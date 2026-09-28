@@ -1,0 +1,33 @@
+name: check_code_quality
+on: pull_request # moment où ce fichier se déclenche (ici lors du PR)
+jobs:
+  black: # librairie python black
+    runs-on: ubuntu-26.04 # pour voir la version ubuntu dans bash : lsb_release -a
+    steps:
+      -uses: actions/checkout@v3 # vérifier le repo
+      -uses: actions/setup-python@v4 # vérifier que python a bien été installé
+      with:
+        python-version: 3.14 # pour voir la version python dans bash : python --version
+      -run: | # le pip '|' permet de faire des commandes multilignes
+        python -p pip install --upgrade pip
+        pip install black
+        black --check --verbose
+    pylint:
+      runs-on: ubuntu-26.04
+      steps:
+        -uses: actions/checkout@v3
+        -uses: actions/setup-python@v4
+        with:
+          python-version: 3.14
+        -run: | 
+          pip install pylint
+          pylint --check --verbose
+    isort:
+      runs-on: ubuntu-26.04
+      steps:
+        -uses: actions/checkout@v3
+        -uses: actions/setup-python@v4
+        with:
+          python-version: 3.14
+        -run: | 
+          isort --check --verbose
