@@ -8,14 +8,6 @@ import ast
 
 conn = duckdb.connect(database='data/exercices_sql_tables.duckdb', read_only=False)
 
-# ANSWER_STR = """
-# SELECT *
-# FROM beverages
-# CROSS JOIN food_items;
-# """
-
-# solution_df = duckdb.sql(ANSWER_STR).df()
-
 with st.sidebar:
     theme = st.selectbox(
         label="What would you like to review?",
@@ -34,7 +26,11 @@ with st.sidebar:
     
     st.write(exercise)
     
+    exercise_name = exercise.loc[0, 'exercice_name']
+    with open(f'answer/{exercise_name}.sql', 'r') as f:
+        answer = f.read()
     
+    solution_df = conn.execute(answer).df()
 
 st.write("""
 # SQL SRS
@@ -48,24 +44,24 @@ if query:
     result = conn.execute(query).df()
     st.dataframe(result)
     
-#     if len(result.columns) != len(solution_df.columns):
-#         st.write("Some columns are missing")
+    if len(result.columns) != len(solution_df.columns):
+        st.warning("Some columns are missing")
 
-#     try:
-#         result = result[solution_df.columns]
-#     except KeyError as e:
-#         st.write(f"Somme columns are missing : {e}")
+    try:
+        result = result[solution_df.columns]
+    except KeyError as e:
+        st.warning(f"Somme columns are missing : {e}")
 
-#     n_line_differences = result.shape[0] - solution_df.shape[0]
+    n_line_differences = result.shape[0] - solution_df.shape[0]
 
-#     if n_line_differences != 0:
-#         st.write(f""" result has a {n_line_differences} lines differences 
-#             with the solution_df """)
+    if n_line_differences != 0:
+        st.warning(f""" result has a {n_line_differences} lines differences 
+            with the solution_df """)
 
-#     try:
-#         st.dataframe(result.compare(solution_df))
-#     except ValueError as e:
-#         st.write(f"Compare not possible  : {e}")
+    try:
+        st.dataframe(result.compare(solution_df))
+    except ValueError as e:
+        st.warning(f"{e}")
 
 tab2, tab3 = st.tabs(["Tables", "solution_df"])
 
@@ -87,7 +83,4 @@ with tab2:
 #     st.dataframe(solution_df)
 
 with tab3:
-    exercise_name = exercise.loc[0, 'exercice_name']
-    with open(f'answer/{exercise_name}.sql', 'r') as f:
-        answer = f.read()
     st.code(answer, language="sql")
