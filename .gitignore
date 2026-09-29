@@ -1,2 +1,4 @@
 .venv
 *.csv
+data/
+test_db.py
