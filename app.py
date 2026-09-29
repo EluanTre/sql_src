@@ -4,6 +4,7 @@
 
 import duckdb
 import streamlit as st
+import ast
 
 conn = duckdb.connect(database='data/exercices_sql_tables.duckdb', read_only=False)
 
@@ -18,7 +19,7 @@ conn = duckdb.connect(database='data/exercices_sql_tables.duckdb', read_only=Fal
 with st.sidebar:
     theme = st.selectbox(
         label="What would you like to review?",
-        options=("cross_join", "groupby", "Windows function"),
+        options=("cross_join", "groupby", "window_functions"),
         index=None,
         placeholder="Select a theme...",
     )
@@ -27,11 +28,13 @@ with st.sidebar:
     exercise = conn.execute(
         f"""
         SELECT * 
-        FROM memory_state
+        FROM memory_state_db
         WHERE theme LIKE '{theme}';
         """).df()
     
     st.write(exercise)
+    
+    
 
 st.write("""
 # SQL SRS
@@ -41,10 +44,10 @@ Space repetition System SQL practice
 st.header("Entrer votre code : ")
 query = st.text_area(label="votre code SQL ici", key="user_input")
 
-# if query:
-#     result = duckdb.sql(query).df()
-#     st.dataframe(result)
-
+if query:
+    result = conn.execute(query).df()
+    st.dataframe(result)
+    
 #     if len(result.columns) != len(solution_df.columns):
 #         st.write("Some columns are missing")
 
@@ -64,9 +67,18 @@ query = st.text_area(label="votre code SQL ici", key="user_input")
 #     except ValueError as e:
 #         st.write(f"Compare not possible  : {e}")
 
-# tab2, tab3 = st.tabs(["Tables", "solution_df"])
+tab2, tab3 = st.tabs(["Tables", "solution_df"])
 
-# with tab2:
+with tab2:
+    
+    # Conversion de la variable en type str à type list
+    exercice_tables = ast.literal_eval(exercise.loc[0, 'tables'])
+    for table in exercice_tables:
+        st.write(f"Table : {table}")
+        df_table = conn.execute(f"SELECT * FROM {table}").df()
+        st.dataframe(df_table)
+        
+        
 #     st.write("table : beverages")
 #     st.dataframe(beverages)
 #     st.write("table : food_items")
@@ -74,5 +86,8 @@ query = st.text_area(label="votre code SQL ici", key="user_input")
 #     st.write("Expected : ")
 #     st.dataframe(solution_df)
 
-# with tab3:
-#     st.write(ANSWER_STR)
+with tab3:
+    exercise_name = exercise.loc[0, 'exercice_name']
+    with open(f'answer/{exercise_name}.sql', 'r') as f:
+        answer = f.read()
+    st.code(answer, language="sql")
