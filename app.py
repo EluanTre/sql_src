@@ -4,9 +4,8 @@
 
 import duckdb
 import streamlit as st
-import ast
 
-conn = duckdb.connect(database='data/exercices_sql_tables.duckdb', read_only=False)
+conn = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=False)
 
 with st.sidebar:
     theme = st.selectbox(
@@ -16,20 +15,19 @@ with st.sidebar:
         placeholder="Select a theme...",
     )
     st.write(f"You selected: {theme}")
-    
-    exercise = conn.execute(
-        f"""
+
+    exercise = conn.execute(f"""
         SELECT * 
         FROM memory_state_db
         WHERE theme LIKE '{theme}';
-        """).df()
-    
+        """).df().sort_values("last_reviewed").reset_index()
+
     st.write(exercise)
-    
-    exercise_name = exercise.loc[0, 'exercice_name']
-    with open(f'answer/{exercise_name}.sql', 'r') as f:
+
+    exercise_name = exercise.loc[0, "exercice_name"]
+    with open(f"answer/{exercise_name}.sql", "r", encoding='utf8') as f:
         answer = f.read()
-    
+
     solution_df = conn.execute(answer).df()
 
 st.write("""
@@ -43,7 +41,7 @@ query = st.text_area(label="votre code SQL ici", key="user_input")
 if query:
     result = conn.execute(query).df()
     st.dataframe(result)
-    
+
     if len(result.columns) != len(solution_df.columns):
         st.warning("Some columns are missing")
 
@@ -66,21 +64,13 @@ if query:
 tab2, tab3 = st.tabs(["Tables", "solution_df"])
 
 with tab2:
-    
+
     # Conversion de la variable en type str à type list
-    exercice_tables = ast.literal_eval(exercise.loc[0, 'tables'])
+    exercice_tables = exercise.loc[0, "tables"]
     for table in exercice_tables:
         st.write(f"Table : {table}")
         df_table = conn.execute(f"SELECT * FROM {table}").df()
         st.dataframe(df_table)
-        
-        
-#     st.write("table : beverages")
-#     st.dataframe(beverages)
-#     st.write("table : food_items")
-#     st.dataframe(food_items)
-#     st.write("Expected : ")
-#     st.dataframe(solution_df)
 
 with tab3:
     st.code(answer, language="sql")
