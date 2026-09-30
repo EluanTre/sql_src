@@ -1,9 +1,21 @@
 # https://github.com/pauzon/
 # pylint: disable=missing-module-docstring
 # pylint: disable=trailing-whitespace
+# pylint: disable=exec-used
+# pylint: disable=consider-using-with
+
+import os
+from pathlib import Path
 
 import duckdb
 import streamlit as st
+
+current_path = Path()
+data_dir_path = current_path / "data"
+data_dir_path.mkdir(exist_ok=True)
+
+if "exercices_sql_tables.duckdb" not in os.listdir("data"):
+    exec(open("init_db.py", encoding="utf-8").read())
 
 conn = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=False)
 
@@ -25,7 +37,7 @@ with st.sidebar:
     st.write(exercise)
 
     exercise_name = exercise.loc[0, "exercice_name"]
-    with open(f"answer/{exercise_name}.sql", "r", encoding='utf8') as f:
+    with open(f"answer/{exercise_name}.sql", "r", encoding="utf8") as f:
         answer = f.read()
 
     solution_df = conn.execute(answer).df()
