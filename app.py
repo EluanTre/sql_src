@@ -4,20 +4,18 @@
 # pylint: disable=exec-used
 # pylint: disable=consider-using-with
 
-import logging
 import os
+from pathlib import Path
 
 import duckdb
 import streamlit as st
 
-if "data" not in os.listdir():
-    print("Creating folder data")
-    logging.error(os.listdir())
-    logging.error("Creating folder data")
-    os.mkdir("data")
+current_path = Path()
+data_dir_path = current_path / "data"
+data_dir_path.mkdir(exist_ok=True)
 
 if "exercices_sql_tables.duckdb" not in os.listdir("data"):
-    exec(open("init_db.py", encoding='utf-8').read())
+    exec(open("init_db.py", encoding="utf-8").read())
 
 conn = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=False)
 
