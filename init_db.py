@@ -85,3 +85,5 @@ conn.execute("""
     SELECT *
     FROM trademark_df;
     """)
+
+conn.close()
