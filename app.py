@@ -26,16 +26,27 @@ with st.sidebar:
         index=None,
         placeholder="Select a theme...",
     )
-    st.write(f"You selected: {theme}")
-
-    exercise = conn.execute(f"""
-        SELECT * 
-        FROM memory_state_db
-        WHERE theme LIKE '{theme}';
-        """).df().sort_values("last_reviewed").reset_index()
-
+    
+    if theme:
+        st.write(f"You selected: {theme}")
+        select_exercise_query = f"""
+            SELECT * 
+            FROM memory_state_db
+            WHERE theme LIKE '{theme}';
+            """
+    else:
+        select_exercise_query = f"""
+            SELECT * 
+            FROM memory_state_db
+            """
+            
+    exercise = (
+        conn.execute(select_exercise_query)
+        .df()
+        .sort_values("last_reviewed")
+        .reset_index(drop=True))
+        
     st.write(exercise)
-
     exercise_name = exercise.loc[0, "exercice_name"]
     with open(f"answer/{exercise_name}.sql", "r", encoding="utf8") as f:
         answer = f.read()
