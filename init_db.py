@@ -15,7 +15,7 @@ data = {
     "theme": ["cross_join", "cross_join"],
     "exercice_name": ["beverages_and_food", "sizes_and_trademarks"],
     "tables": [["beverages_db", "food_items_db"], ["size_db", "trademark_db"]],
-    "last_reviewed": ["1980-01-01", "1970-01-01"],
+    "last_reviewed": ["1980-01-01", "2020-01-01"],
 }
 memory_state_df = pd.DataFrame(data)
 conn.execute("""
